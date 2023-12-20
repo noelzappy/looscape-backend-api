@@ -3,6 +3,7 @@ import { Service } from 'typedi';
 import { HttpException } from '@exceptions/HttpException';
 import { User } from '@interfaces/users.interface';
 import { UserModel } from '@models/users.model';
+import httpStatus from 'http-status';
 
 @Service()
 export class UserService {
@@ -18,20 +19,24 @@ export class UserService {
     return findUser;
   }
 
+  public async findUserByEmail(email: string, skipCheckExist = false): Promise<User> {
+    const findUser: User = await UserModel.findOne({ email: email });
+
+    if (!findUser && !skipCheckExist) throw new HttpException(httpStatus.NOT_FOUND, 'User not found');
+
+    return findUser;
+  }
+
   public async createUser(userData: User): Promise<User> {
     const findUser: User = await UserModel.findOne({ email: userData.email });
-    if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
-
-    const hashedPassword = await hash(userData.password, 10);
-    const createUserData: User = await UserModel.create({ ...userData, password: hashedPassword });
-
-    return createUserData;
+    if (findUser) throw new HttpException(httpStatus.CONFLICT, `This email ${userData.email} already exists`);
+    return await UserModel.create(userData);
   }
 
   public async updateUser(userId: string, userData: User): Promise<User> {
     if (userData.email) {
       const findUser: User = await UserModel.findOne({ email: userData.email });
-      if (findUser && findUser._id != userId) throw new HttpException(409, `This email ${userData.email} already exists`);
+      if (findUser && findUser._id != userId) throw new HttpException(httpStatus.CONFLICT, `This email ${userData.email} already exists`);
     }
 
     if (userData.password) {

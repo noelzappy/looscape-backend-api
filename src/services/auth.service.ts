@@ -1,48 +1,52 @@
-import { hash, compare } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
-import { Service } from 'typedi';
-import { SECRET_KEY } from '@config';
+import Container, { Service } from 'typedi';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
 import { UserModel } from '@models/users.model';
-
-const createToken = (user: User): TokenData => {
-  const dataStoredInToken: DataStoredInToken = { _id: user._id };
-  const expiresIn: number = 60 * 60;
-
-  return { expiresIn, token: sign(dataStoredInToken, SECRET_KEY, { expiresIn }) };
-};
-
-const createCookie = (tokenData: TokenData): string => {
-  return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn};`;
-};
+import httpStatus from 'http-status';
+import { compare } from 'bcrypt';
+import { TOKEN_TYPE, TokenInfo } from '@/interfaces/auth.interface';
+import { TokenService } from './token.service';
+import { UserService } from './users.service';
+import { LoginUserDto } from '@/dtos/users.dto';
 
 @Service()
 export class AuthService {
-  public async signup(userData: User): Promise<User> {
-    const findUser: User = await UserModel.findOne({ email: userData.email });
-    if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
+  public tokenService = Container.get(TokenService);
+  public userService = Container.get(UserService);
 
-    const hashedPassword = await hash(userData.password, 10);
-    const createUserData: User = await UserModel.create({ ...userData, password: hashedPassword });
+  public async signup(userData: User): Promise<{ token: TokenInfo; user: User }> {
+    const findUser = await this.userService.findUserByEmail(userData.email, true);
 
-    return createUserData;
+    if (findUser) throw new HttpException(httpStatus.CONFLICT, `This email ${userData.email} already exists`);
+
+    const createUserData: User = await this.userService.createUser(userData);
+
+    const tokenData = await this.tokenService.createToken(createUserData, TOKEN_TYPE.AUTH);
+
+    return { token: tokenData, user: createUserData };
   }
 
-  public async login(userData: User): Promise<{ cookie: string; findUser: User }> {
-    const findUser: User = await UserModel.findOne({ email: userData.email });
-    if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
+  public async login(userData: LoginUserDto): Promise<{ token: TokenInfo; user: User }> {
+    const findUser: User = await this.userService.findUserByEmail(userData.email, true);
+    if (!findUser) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid email or password');
 
-    const isPasswordMatching: boolean = await compare(userData.password, findUser.password);
-    if (!isPasswordMatching) throw new HttpException(409, 'Password is not matching');
+    const isPasswordMatching = await compare(userData.password, findUser.password);
 
-    const tokenData = createToken(findUser);
-    const cookie = createCookie(tokenData);
+    console.log(isPasswordMatching, userData.password, findUser.password);
 
-    return { cookie, findUser };
+    if (!isPasswordMatching) throw new HttpException(httpStatus.UNAUTHORIZED, 'Invalid email or password');
+
+    const tokenData = await this.tokenService.createToken(findUser, TOKEN_TYPE.AUTH);
+
+    return { token: tokenData, user: findUser };
   }
 
+  /**
+   *
+   * @deprecated
+   * @param userData
+   * @returns
+   */
   public async logout(userData: User): Promise<User> {
     const findUser: User = await UserModel.findOne({ email: userData.email, password: userData.password });
     if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
