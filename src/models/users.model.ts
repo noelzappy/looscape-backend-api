@@ -1,5 +1,7 @@
 import { model, Schema, Document } from 'mongoose';
 import { User } from '@interfaces/users.interface';
+import toJSON from './plugins/toJson.plugin';
+import paginate from './plugins/paginate.plugin';
 
 const UserSchema: Schema = new Schema({
   email: {
@@ -10,7 +12,11 @@ const UserSchema: Schema = new Schema({
   password: {
     type: String,
     required: true,
+    private: true,
   },
 });
+
+UserSchema.plugin(toJSON);
+UserSchema.plugin(paginate);
 
 export const UserModel = model<User & Document>('User', UserSchema);

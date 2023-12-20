@@ -45,7 +45,9 @@ export class App {
   }
 
   private async connectToDatabase() {
+    logger.info(`======= Connecting to DB =======`);
     await dbConnection();
+    logger.info(`======= 🚀 DB connected =========`);
   }
 
   private initializeMiddlewares() {
