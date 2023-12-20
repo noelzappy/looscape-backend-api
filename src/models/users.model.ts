@@ -5,12 +5,7 @@ import paginate from './plugins/paginate.plugin';
 import { DB_COLLECTIONS } from '@/config';
 import { compare, hash } from 'bcrypt';
 
-interface IUserDocument extends User, Document {
-  isEmailTaken(email: string, excludeUserId?: string): Promise<boolean>;
-  isPasswordMatch(password: string): Promise<boolean>;
-}
-
-const UserSchema: Schema<IUserDocument> = new Schema({
+const UserSchema: Schema<User & Document> = new Schema({
   email: {
     type: String,
     required: true,
@@ -77,4 +72,4 @@ UserSchema.pre('save', async function (next) {
   next();
 });
 
-export const UserModel = model<IUserDocument>(DB_COLLECTIONS.USER, UserSchema);
+export const UserModel = model<User & Document>(DB_COLLECTIONS.USER, UserSchema);

@@ -37,13 +37,23 @@ export class CreateUserDto {
 export class UpdateUserDto {
   @IsString()
   @IsNotEmpty()
-  @MinLength(9)
-  @MaxLength(32)
-  public password: string;
+  public name: string;
 
   @IsString()
-  @IsNotEmpty()
-  public name: string;
+  @IsOptional()
+  public avatar: string;
+
+  @IsString()
+  @IsOptional()
+  public phoneNumber: string;
+
+  @IsString()
+  @IsOptional()
+  public company: string;
+
+  @IsString()
+  @IsOptional()
+  public country: string;
 }
 
 export class LoginUserDto {

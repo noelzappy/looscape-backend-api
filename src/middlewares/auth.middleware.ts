@@ -1,38 +1,34 @@
-import { NextFunction, Request, Response } from 'express';
-import { verify } from 'jsonwebtoken';
-import { SECRET_KEY } from '@config';
+import passport from 'passport';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
-import { UserModel } from '@models/users.model';
+import { RequestWithUser } from '@interfaces/auth.interface';
+import httpStatus from 'http-status';
+import { roleRights } from '@/config/roles';
 
-const getAuthorization = (req: Request) => {
-  const coockie = req.cookies['Authorization'];
-  if (coockie) return coockie;
-
-  const header = req.header('Authorization');
-  if (header) return header.split('Bearer ')[1];
-
-  return null;
-};
-
-export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-  try {
-    const Authorization = getAuthorization(req);
-
-    if (Authorization) {
-      const { _id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
-      const findUser = await UserModel.findById(_id);
-
-      if (findUser) {
-        req.user = findUser;
-        next();
-      } else {
-        next(new HttpException(401, 'Wrong authentication token'));
-      }
-    } else {
-      next(new HttpException(404, 'Authentication token missing'));
-    }
-  } catch (error) {
-    next(new HttpException(401, 'Wrong authentication token'));
+const verifyCallback = (req: RequestWithUser, resolve, reject, requiredRights: string[]) => async (err, user, info) => {
+  if (err || info || !user) {
+    return reject(new HttpException(httpStatus.UNAUTHORIZED, 'Please authenticate'));
   }
+
+  req.user = user;
+
+  if (requiredRights.length) {
+    const userRights = roleRights.get(user.role);
+    const hasRequiredRights = requiredRights.every(requiredRight => userRights.includes(requiredRight));
+
+    if (!hasRequiredRights && req.params.userId !== user.id) {
+      return reject(new HttpException(httpStatus.FORBIDDEN, 'Forbidden'));
+    }
+  }
+
+  resolve();
 };
+
+export const Auth =
+  (...requiredRights: string[]) =>
+  async (req, res, next) => {
+    return new Promise((resolve, reject) => {
+      passport.authenticate('jwt', { session: false }, verifyCallback(req, resolve, reject, requiredRights))(req, res, next);
+    })
+      .then(() => next())
+      .catch(err => next(err));
+  };

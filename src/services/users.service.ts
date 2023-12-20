@@ -12,9 +12,9 @@ export class UserService {
     return users;
   }
 
-  public async findUserById(userId: string): Promise<User> {
+  public async findUserById(userId: string, skipCheckExist = false): Promise<User> {
     const findUser: User = await UserModel.findOne({ _id: userId });
-    if (!findUser) throw new HttpException(409, "User doesn't exist");
+    if (!findUser && !skipCheckExist) throw new HttpException(httpStatus.NOT_FOUND, 'User not found');
 
     return findUser;
   }
@@ -34,20 +34,15 @@ export class UserService {
   }
 
   public async updateUser(userId: string, userData: User): Promise<User> {
-    if (userData.email) {
-      const findUser: User = await UserModel.findOne({ email: userData.email });
-      if (findUser && findUser._id != userId) throw new HttpException(httpStatus.CONFLICT, `This email ${userData.email} already exists`);
-    }
+    const user = await UserModel.findById(userId);
 
-    if (userData.password) {
-      const hashedPassword = await hash(userData.password, 10);
-      userData = { ...userData, password: hashedPassword };
-    }
+    if (!user) throw new HttpException(httpStatus.NOT_FOUND, 'User not found');
 
-    const updateUserById: User = await UserModel.findByIdAndUpdate(userId, { userData });
-    if (!updateUserById) throw new HttpException(409, "User doesn't exist");
+    Object.assign(user, userData);
 
-    return updateUserById;
+    const updatedUser = await user.save();
+
+    return updatedUser;
   }
 
   public async deleteUser(userId: string): Promise<User> {
