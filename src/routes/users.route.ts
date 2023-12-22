@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { UserController } from '@controllers/users.controller';
-import { CreateUserDto, UpdateUserDto } from '@dtos/users.dto';
+import { UpdateUserDto } from '@dtos/users.dto';
 import { Routes } from '@interfaces/routes.interface';
 import { ValidationMiddleware } from '@middlewares/validation.middleware';
 import { Auth } from '@/middlewares/auth.middleware';
+import { GetQueryDto } from '@/dtos/misc.dto';
 
 export class UserRoute implements Routes {
   public path = '/users';
@@ -15,7 +16,7 @@ export class UserRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get(`${this.path}`, this.user.getUsers);
+    this.router.get(`${this.path}`, Auth('getUsers'), ValidationMiddleware(GetQueryDto, 'query', true), this.user.getUsers);
     this.router.get(`${this.path}/me`, Auth(), this.user.getMe);
     this.router.put(`${this.path}/me`, Auth(), ValidationMiddleware(UpdateUserDto, 'body', true), this.user.updateMe);
 

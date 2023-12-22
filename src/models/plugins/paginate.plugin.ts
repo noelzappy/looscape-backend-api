@@ -1,5 +1,7 @@
 /* eslint-disable no-param-reassign */
 
+import { PaginatedData } from '@/interfaces/misc.interface';
+
 const paginate = (schema: any) => {
   /**
    * @typedef {Object} QueryResult
@@ -19,7 +21,7 @@ const paginate = (schema: any) => {
    * @param {number} [options.page] - Current page (default = 1)
    * @returns {Promise<QueryResult>}
    */
-  schema.statics.paginate = async function (filter, options) {
+  schema.statics.paginate = async function (filter, options): Promise<PaginatedData<any>> {
     let sort = '';
     if (options.sortBy) {
       const sortingCriteria = [];

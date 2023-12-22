@@ -19,18 +19,6 @@ export class UserController {
     }
   };
 
-  public updateUser = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId: string = req.params.id;
-      const userData: User = req.body;
-      const updateUserData: User = await this.user.updateUser(userId, userData);
-
-      res.status(200).json({ data: updateUserData, message: 'updated' });
-    } catch (error) {
-      next(error);
-    }
-  };
-
   public getMe = catchAsync(async (req: RequestWithUser, res: Response) => {
     const user = await this.user.findUserById(req.user.id);
     res.status(httpStatus.OK).send(user);

@@ -5,39 +5,44 @@ import paginate from './plugins/paginate.plugin';
 import { DB_COLLECTIONS } from '@/config';
 import { compare, hash } from 'bcrypt';
 
-const UserSchema: Schema<User & Document> = new Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
+const UserSchema: Schema<User & Document> = new Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      private: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    avatar: {
+      type: String,
+    },
+    phoneNumber: {
+      type: String,
+    },
+    company: {
+      type: String,
+    },
+    country: {
+      type: String,
+    },
+    role: {
+      type: String,
+      enum: Object.values(ROLE),
+      default: ROLE.USER,
+    },
   },
-  password: {
-    type: String,
-    required: true,
-    private: true,
+  {
+    timestamps: true,
   },
-  name: {
-    type: String,
-    required: true,
-  },
-  avatar: {
-    type: String,
-  },
-  phoneNumber: {
-    type: String,
-  },
-  company: {
-    type: String,
-  },
-  country: {
-    type: String,
-  },
-  role: {
-    type: String,
-    enum: Object.values(ROLE),
-    default: ROLE.USER,
-  },
-});
+);
 
 UserSchema.plugin(toJSON);
 UserSchema.plugin(paginate);

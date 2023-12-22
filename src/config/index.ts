@@ -8,4 +8,6 @@ export const { DB_URL } = process.env;
 export enum DB_COLLECTIONS {
   USER = 'User',
   TOKEN = 'Token',
+  BOARD = 'Board',
+  BOARD_LOCATION = 'BoardLocation',
 }
