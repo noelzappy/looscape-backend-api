@@ -3,11 +3,17 @@ import { HttpException } from '@exceptions/HttpException';
 import httpStatus from 'http-status';
 import { User } from '@interfaces/users.interface';
 import { UserModel } from '@models/users.model';
+import { PaginatedData, QueryFilter } from '@/interfaces/misc.interface';
 
 @Service()
 export class UserService {
   public async findAllUser(): Promise<User[]> {
     const users: User[] = await UserModel.find();
+    return users;
+  }
+
+  public async queryUsers(filter: QueryFilter, options: any): Promise<PaginatedData<User>> {
+    const users = await UserModel.paginate(filter, options);
     return users;
   }
 

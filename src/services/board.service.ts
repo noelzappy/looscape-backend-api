@@ -4,8 +4,7 @@ import httpStatus from 'http-status';
 import { BoardStatus, IBoard } from '@/interfaces/board.interface';
 import BoardModel from '@/models/board.model';
 import { CreateBoardDto, UpdateBoardDto } from '@/dtos/board.dto';
-import { PaginatedData, QueryFilter, QueryOptions } from '@/interfaces/misc.interface';
-import { ObjectId } from 'mongoose';
+import { PaginatedData, QueryFilter } from '@/interfaces/misc.interface';
 
 @Service()
 export class BoardService {
@@ -13,7 +12,7 @@ export class BoardService {
     return BoardModel.create(boardData);
   }
 
-  public async queryBoards(filter: QueryFilter, options: QueryOptions): Promise<PaginatedData<IBoard>> {
+  public async queryBoards(filter: QueryFilter, options: any): Promise<PaginatedData<IBoard>> {
     const boards = await BoardModel.paginate(filter, options);
     return boards;
   }
@@ -25,7 +24,7 @@ export class BoardService {
     return board;
   }
 
-  public async updateBoard(boardId: ObjectId, boardData: UpdateBoardDto): Promise<IBoard> {
+  public async updateBoard(boardId: string, boardData: UpdateBoardDto): Promise<IBoard> {
     const board = await BoardModel.findById(boardId);
 
     if (!board) throw new HttpException(httpStatus.NOT_FOUND, 'Bill board not found');
@@ -36,7 +35,7 @@ export class BoardService {
     return updatedBoard;
   }
 
-  public async deleteBoard(boardId: ObjectId): Promise<IBoard> {
+  public async deleteBoard(boardId: string): Promise<IBoard> {
     const board = await BoardModel.findById(boardId);
     if (!board) throw new HttpException(httpStatus.NOT_FOUND, "Board doesn't exist");
 

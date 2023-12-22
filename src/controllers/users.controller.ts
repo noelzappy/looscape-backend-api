@@ -1,23 +1,23 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { Container } from 'typedi';
+import httpStatus from 'http-status';
+import { RequestWithUser } from '@/interfaces/auth.interface';
+import catchAsync from '@/utils/catchAsync';
+import _ from 'lodash';
 import { User } from '@interfaces/users.interface';
 import { UserService } from '@services/users.service';
-import catchAsync from '@/utils/catchAsync';
-import { RequestWithUser } from '@/interfaces/auth.interface';
-import httpStatus from 'http-status';
 
 export class UserController {
   public user = Container.get(UserService);
 
-  public getUsers = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const findAllUsersData: User[] = await this.user.findAllUser();
+  public getUsers = catchAsync(async (req: Request, res: Response) => {
+    const filter = _.pick(req.query, ['name', 'email', 'role']);
+    const options = _.pick(req.query, ['sortBy', 'limit', 'page']);
 
-      res.status(200).json({ data: findAllUsersData, message: 'findAll' });
-    } catch (error) {
-      next(error);
-    }
-  };
+    const queryUsersData = await this.user.queryUsers(filter, options);
+
+    res.status(httpStatus.OK).json(queryUsersData);
+  });
 
   public getMe = catchAsync(async (req: RequestWithUser, res: Response) => {
     const user = await this.user.findUserById(req.user.id);

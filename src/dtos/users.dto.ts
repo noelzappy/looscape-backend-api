@@ -1,4 +1,5 @@
 import { IsEmail, IsString, IsNotEmpty, MinLength, IsOptional } from 'class-validator';
+import { GetQueryDto } from './misc.dto';
 
 export class CreateUserDto {
   @IsEmail()
@@ -63,4 +64,18 @@ export class LoginUserDto {
   @IsString()
   @IsNotEmpty()
   public password: string;
+}
+
+export class GetUsersDto extends GetQueryDto {
+  @IsString()
+  @IsOptional()
+  public name: string;
+
+  @IsEmail()
+  @IsOptional()
+  public email: string;
+
+  @IsString()
+  @IsOptional()
+  public role: string;
 }

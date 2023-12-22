@@ -1,6 +1,6 @@
 export const allRoles = {
   user: [],
-  admin: ['getUsers', 'manageUsers'],
+  admin: ['getUsers', 'manageUsers', 'manageBoards'],
 } as const;
 
 export const roles = Object.keys(allRoles) as Array<keyof typeof allRoles>;

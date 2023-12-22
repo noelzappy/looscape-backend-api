@@ -1,4 +1,7 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { BoardStatus } from '@/interfaces/board.interface';
+import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
+import { ObjectId } from 'mongoose';
+import { GetQueryDto } from './misc.dto';
 
 export class CreateBoardDto {
   @IsString()
@@ -9,11 +12,11 @@ export class CreateBoardDto {
   @IsNotEmpty()
   public description: string;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   public height: number;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   public width: number;
 
@@ -23,7 +26,7 @@ export class CreateBoardDto {
 
   @IsString()
   @IsNotEmpty()
-  public location: string;
+  public location: ObjectId;
 }
 
 export class UpdateBoardDto {
@@ -50,6 +53,10 @@ export class UpdateBoardDto {
   @IsString()
   @IsNotEmpty()
   public location: string;
+
+  @IsString()
+  @IsOptional()
+  public status: BoardStatus;
 }
 
 export class CreateBoardLocationDto {
@@ -69,11 +76,11 @@ export class CreateBoardLocationDto {
   @IsNotEmpty()
   public postalCode: string;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   public latitude: number;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   public longitude: number;
 
@@ -88,4 +95,26 @@ export class CreateBoardLocationDto {
   @IsString()
   @IsNotEmpty()
   public googlePlaceId: string;
+}
+
+export class GetBoardsDto extends GetQueryDto {
+  @IsString()
+  @IsOptional()
+  public name: string;
+
+  @IsString()
+  @IsOptional()
+  public status: BoardStatus;
+
+  @IsString()
+  @IsOptional()
+  public height: number;
+
+  @IsString()
+  @IsOptional()
+  public width: number;
+
+  @IsString()
+  @IsOptional()
+  public doubleSided: boolean;
 }
