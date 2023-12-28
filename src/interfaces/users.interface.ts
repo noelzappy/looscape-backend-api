@@ -14,4 +14,5 @@ export interface User {
   phoneNumber?: string;
   company?: string;
   country?: string;
+  isEmailVerified: boolean;
 }

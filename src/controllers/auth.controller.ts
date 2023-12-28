@@ -22,6 +22,18 @@ export class AuthController {
     res.status(httpStatus.OK).send(authData);
   });
 
+  public verifyEmail = catchAsync(async (req: Request, res: Response) => {
+    const { token } = req.params;
+    await this.auth.verifyEmail(token);
+    return res.status(httpStatus.NO_CONTENT).send();
+  });
+
+  public sendEmailVerification = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const userData: User = req.user;
+    await this.auth.sendEmailVerification(userData);
+    return res.status(httpStatus.NO_CONTENT).send();
+  });
+
   /**
    * @deprecated
    **/

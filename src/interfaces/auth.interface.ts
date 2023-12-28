@@ -14,7 +14,7 @@ export interface DataStoredInToken {
 
 export interface TokenData {
   token: string;
-  user: string;
+  user: string | User;
   type: TOKEN_TYPE;
   id?: string;
   _id?: string;

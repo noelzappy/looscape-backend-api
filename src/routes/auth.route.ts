@@ -3,6 +3,7 @@ import { AuthController } from '@controllers/auth.controller';
 import { CreateUserDto, LoginUserDto } from '@dtos/users.dto';
 import { Routes } from '@interfaces/routes.interface';
 import { ValidationMiddleware } from '@middlewares/validation.middleware';
+import { Auth } from '@/middlewares/auth.middleware';
 
 export class AuthRoute implements Routes {
   public path = '/auth';
@@ -16,6 +17,9 @@ export class AuthRoute implements Routes {
   private initializeRoutes() {
     this.router.post(`${this.path}/signup`, ValidationMiddleware(CreateUserDto), this.auth.signUp);
     this.router.post(`${this.path}/login`, ValidationMiddleware(LoginUserDto), this.auth.logIn);
+    this.router.get(`${this.path}/verify-email/:token`, this.auth.verifyEmail);
+    this.router.post(`${this.path}/send-email-verification`, Auth(), this.auth.sendEmailVerification);
+
     // this.router.post(`${this.path}/logout`, AuthMiddleware, this.auth.logOut);
   }
 }

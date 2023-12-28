@@ -38,6 +38,10 @@ const UserSchema: Schema<User & Document> = new Schema(
       enum: Object.values(ROLE),
       default: ROLE.USER,
     },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
