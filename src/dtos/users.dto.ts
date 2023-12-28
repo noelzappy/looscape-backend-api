@@ -79,3 +79,19 @@ export class GetUsersDto extends GetQueryDto {
   @IsOptional()
   public role: string;
 }
+
+export class SendPasswordResetDto {
+  @IsEmail()
+  @IsNotEmpty()
+  public email: string;
+}
+
+export class ResetPasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  public password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  public confirmPassword: string;
+}

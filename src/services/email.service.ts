@@ -97,12 +97,21 @@ export class EmailService {
 
   public sendPasswordResetEmail = async (user: User, token: string) => {
     const subject = 'Password Reset';
-    const text = `Hi ${user.name},\n\nYou are receiving this email because you (or someone else) has requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\n${CLIENT_URL}/reset-password/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`;
+
+    const html = `<p>Hi ${user.name},</p>
+    <p>You are receiving this email because you (or someone else) has requested the reset of the password for your account.</p> <p>Please click on the following link, or paste this into your browser to complete the process:</p>
+    <p>
+    <a   href="${CLIENT_URL}/reset-password/${token}">
+    <button style="background-color: #64C6C5; /* Green */ border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block;"
+    >Reset Password</button>
+    </a>
+    </p>
+    <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>`;
 
     await this.sendEmail({
       to: user.email,
       subject,
-      text,
+      html,
     });
   };
 

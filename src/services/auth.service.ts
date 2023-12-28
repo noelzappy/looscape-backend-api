@@ -58,7 +58,7 @@ export class AuthService {
     Object.assign(findUser, { isEmailVerified: true });
     await findUser.save();
 
-    return user as User;
+    return findUser;
   }
 
   public async sendEmailVerification(userData: User): Promise<void> {
@@ -71,6 +71,33 @@ export class AuthService {
     const tokenData = await this.tokenService.createToken(findUser, TOKEN_TYPE.VERIFY_EMAIL);
 
     await this.email.sendEmailVerificationEmail(findUser, tokenData.token);
+  }
+
+  public async sendPasswordReset(userEmail: string): Promise<void> {
+    const findUser = await this.userService.findUserByEmail(userEmail, true);
+
+    if (!findUser) throw new HttpException(httpStatus.NOT_FOUND, 'Could not initiate password reset. Please try again.');
+
+    await TokenModel.deleteMany({ user: findUser.id, type: TOKEN_TYPE.RESET_PASSWORD });
+
+    const tokenData = await this.tokenService.createToken(findUser, TOKEN_TYPE.RESET_PASSWORD);
+
+    await this.email.sendPasswordResetEmail(findUser, tokenData.token);
+  }
+
+  public async resetPassword(token: string, newPassword: string): Promise<User> {
+    const { user }: any = await this.tokenService.verifyToken(token, TOKEN_TYPE.RESET_PASSWORD);
+
+    if (!user) throw new HttpException(httpStatus.NOT_FOUND, 'Password reset failed. Please try again.');
+
+    const findUser = await UserModel.findById(user.id);
+
+    if (!findUser) throw new HttpException(httpStatus.NOT_FOUND, 'Password reset failed. Please try again.');
+
+    Object.assign(findUser, { password: newPassword });
+    await findUser.save();
+
+    return findUser;
   }
 
   /**
