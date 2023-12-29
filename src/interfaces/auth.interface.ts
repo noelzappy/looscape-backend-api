@@ -28,3 +28,7 @@ export interface TokenInfo {
 export interface RequestWithUser extends Request {
   user: User;
 }
+
+export interface RequestWithFileAndUser extends RequestWithUser {
+  file: any;
+}

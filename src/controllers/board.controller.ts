@@ -23,6 +23,8 @@ export class BoardController {
     const filter = _.pick(req.query, ['name', 'status', 'height', 'width', 'doubleSided']);
     const options = _.pick(req.query, ['sortBy', 'limit', 'page']);
 
+    options['populate'] = 'location';
+
     const queryBoardsData = await this.board.queryBoards(filter, options);
 
     res.status(httpStatus.OK).json(queryBoardsData);

@@ -1,5 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsInt } from 'class-validator';
-import { ObjectId } from 'mongoose';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsInt, IsNumberString, IsDateString } from 'class-validator';
 import { GetQueryDto } from './misc.dto';
 
 export class CreateBannerDto {
@@ -15,15 +14,15 @@ export class CreateBannerDto {
   @IsNotEmpty()
   public board: string;
 
-  @IsString()
+  @IsDateString()
   @IsNotEmpty()
   public startDate: Date;
 
-  @IsString()
+  @IsDateString()
   @IsNotEmpty()
   public endDate: Date;
 
-  @IsInt() // 15, 30, 45, 60 are the only valid values
+  @IsNumberString() // 15, 30, 45, 60 are the only valid values
   @IsNotEmpty()
   public duration: number;
 }

@@ -1,23 +1,31 @@
 import { Request, Response } from 'express';
 import { Container } from 'typedi';
 import httpStatus from 'http-status';
-import { RequestWithUser } from '@/interfaces/auth.interface';
+import { RequestWithFileAndUser, RequestWithUser } from '@/interfaces/auth.interface';
 import catchAsync from '@/utils/catchAsync';
 import _ from 'lodash';
 import BannerService from '@/services/banner.service';
 import { CreateBannerDto, UpdateBannerDto } from '@/dtos/banner.dto';
 import { BannerStatus } from '@/interfaces/banner.interface';
+import { HttpException } from '@/exceptions/HttpException';
 
 export class BannerController {
   public banner = Container.get(BannerService);
 
-  public createBanner = catchAsync(async (req: RequestWithUser, res: Response) => {
+  public createBanner = catchAsync(async (req: RequestWithFileAndUser, res: Response) => {
+    if (!req.file) {
+      throw new HttpException(httpStatus.BAD_REQUEST, 'Asset is required');
+    }
+
     const bannerData: CreateBannerDto = {
       ...req.body,
       user: req.user.id,
       status: BannerStatus.PENDING,
-      price: 0, // TODO: calculate price
+      assetUrl: req.file.location,
+      price: 10, // TODO: calculate price
     };
+
+    console.log(bannerData);
 
     const createBannerData = await this.banner.createBanner(bannerData);
 
@@ -38,7 +46,7 @@ export class BannerController {
     res.status(httpStatus.OK).send(banner);
   });
 
-  public updateBanner = catchAsync(async (req: Request, res: Response) => {
+  public updateBanner = catchAsync(async (req: RequestWithUser, res: Response) => {
     const bannerId: string = req.params.id;
     const bannerData: UpdateBannerDto = req.body;
     const updateBannerData = await this.banner.updateBanner(bannerId, bannerData);
