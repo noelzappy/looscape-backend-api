@@ -1,23 +1,12 @@
-import aws from 'aws-sdk';
-import { S3Client } from '@aws-sdk/client-s3';
 import multer from 'multer';
 import multerS3 from 'multer-s3';
 import crypto from 'crypto';
-
-const spacesEndpoint: any = new aws.Endpoint('fra1.digitaloceanspaces.com');
-
-const s3 = new S3Client({
-  endpoint: spacesEndpoint,
-  credentials: {
-    accessKeyId: 'DO00EX2ZCLCJ9CYJ4FF9',
-    secretAccessKey: '6tBhk0pEvSwccY6JxKvQ5Zzu5UfOcitqLCdTwWfK1fU',
-  },
-  region: 'fra1',
-});
+import { S3Client } from '@/config/s3config';
+import { DO_SPACES_BUCKET } from '@/config';
 
 const storage = multerS3({
-  s3,
-  bucket: 'alvibeauty',
+  s3: S3Client,
+  bucket: DO_SPACES_BUCKET,
   acl: 'public-read',
   key: (request, file, cb) => {
     cb(null, `${crypto.randomUUID()}-${file.originalname}`);

@@ -17,14 +17,11 @@ export class BannerRoute implements Routes {
 
   private initializeRoutes() {
     this.router.get(`${this.path}`, ValidationMiddleware(GetBannerQueryDto, 'query'), this.banner.getBanners);
+    this.router.post(`${this.path}/upload`, Auth(), UploadMiddleware.single('asset'), this.banner.uploadAsset);
+    this.router.delete(`${this.path}/upload`, Auth(), this.banner.deleteAsset);
+
+    this.router.post(`${this.path}`, Auth(), ValidationMiddleware(CreateBannerDto), this.banner.createBanner);
     this.router.get(`${this.path}/:id`, this.banner.getBanner);
-    this.router.post(
-      `${this.path}`,
-      Auth(),
-      UploadMiddleware.single('asset'),
-      ValidationMiddleware(CreateBannerDto, 'body', true),
-      this.banner.createBanner,
-    );
     this.router.put(`${this.path}/:id`, Auth(), ValidationMiddleware(UpdateBannerDto, 'body', true), this.banner.updateBanner);
   }
 }

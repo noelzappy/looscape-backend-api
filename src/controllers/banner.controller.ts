@@ -8,24 +8,19 @@ import BannerService from '@/services/banner.service';
 import { CreateBannerDto, UpdateBannerDto } from '@/dtos/banner.dto';
 import { BannerStatus } from '@/interfaces/banner.interface';
 import { HttpException } from '@/exceptions/HttpException';
+import { S3Client } from '@/config/s3config';
+import { DO_SPACES_BUCKET } from '@/config';
 
 export class BannerController {
   public banner = Container.get(BannerService);
 
   public createBanner = catchAsync(async (req: RequestWithFileAndUser, res: Response) => {
-    if (!req.file) {
-      throw new HttpException(httpStatus.BAD_REQUEST, 'Asset is required');
-    }
-
     const bannerData: CreateBannerDto = {
       ...req.body,
       user: req.user.id,
       status: BannerStatus.PENDING,
-      assetUrl: req.file.location,
       price: 10, // TODO: calculate price
     };
-
-    console.log(bannerData);
 
     const createBannerData = await this.banner.createBanner(bannerData);
 
@@ -52,5 +47,28 @@ export class BannerController {
     const updateBannerData = await this.banner.updateBanner(bannerId, bannerData);
 
     res.status(httpStatus.OK).send(updateBannerData);
+  });
+
+  public uploadAsset = catchAsync(async (req: RequestWithFileAndUser, res: Response) => {
+    if (!req.file) {
+      throw new HttpException(httpStatus.BAD_REQUEST, 'Asset is required');
+    }
+    res.status(httpStatus.CREATED).send(req.file);
+  });
+
+  public deleteAsset = catchAsync(async (req: RequestWithUser, res: Response) => {
+    const { assetUrl, key } = req.body;
+
+    if (!assetUrl || !key) {
+      throw new HttpException(httpStatus.BAD_REQUEST, 'Asset url or key are required');
+    }
+    const objectKey = assetUrl ? assetUrl.split('/').pop() : key;
+
+    await S3Client.deleteObject({
+      Bucket: DO_SPACES_BUCKET,
+      Key: objectKey,
+    });
+
+    res.status(httpStatus.NO_CONTENT).send();
   });
 }

@@ -1,4 +1,4 @@
-import { cleanEnv, port, str } from 'envalid';
+import { cleanEnv, port, str, url } from 'envalid';
 
 export const ValidateEnv = () => {
   cleanEnv(process.env, {
@@ -14,6 +14,10 @@ export const ValidateEnv = () => {
     MAIL_FROM: str(),
     MAIL_USER: str(),
     MAIL_PASSWORD: str(),
-    CLIENT_URL: str(),
+    CLIENT_URL: url(),
+    DO_SPACES_ENDPOINT: url(),
+    DO_SPACES_KEY: str(),
+    DO_SPACES_SECRET: str(),
+    DO_SPACES_BUCKET: str(),
   });
 };
