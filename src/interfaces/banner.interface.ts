@@ -19,8 +19,7 @@ export interface IBanner {
   board: string | IBoard;
   startDate: Date;
   endDate: Date;
-  user?: string | User;
-  assetLength: number;
+  user: string | User;
   status: BannerStatus;
   duration: number; // 15, 30, 45, 60
 }
