@@ -13,4 +13,5 @@ export enum DB_COLLECTIONS {
   BOARD = 'Board',
   BOARD_LOCATION = 'BoardLocation',
   BANNER = 'Banner',
+  PAYMENT = 'Payment',
 }

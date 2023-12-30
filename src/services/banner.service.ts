@@ -3,7 +3,7 @@ import { HttpException } from '@exceptions/HttpException';
 import httpStatus from 'http-status';
 import BannerModel from '@/models/banner.model';
 import { PaginatedData, QueryFilter } from '@/interfaces/misc.interface';
-import { IBanner } from '@/interfaces/banner.interface';
+import { BannerPriceParams, IBanner } from '@/interfaces/banner.interface';
 import { CreateBannerDto, UpdateBannerDto } from '@/dtos/banner.dto';
 
 @Service()
@@ -41,5 +41,13 @@ export default class BannerService {
     await banner.save();
 
     return banner;
+  }
+
+  public async determineBannerPrice(banner: BannerPriceParams): Promise<number> {
+    const { duration, board, startDate, endDate } = banner;
+
+    // TODO: Implement logic to determine price based on duration, board, startDate and endDate
+
+    return 10;
   }
 }

@@ -10,17 +10,28 @@ import { BannerStatus } from '@/interfaces/banner.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { S3Client } from '@/config/s3config';
 import { DO_SPACES_BUCKET } from '@/config';
+import { BoardService } from '@/services/board.service';
 
 export class BannerController {
   public banner = Container.get(BannerService);
+  public board = Container.get(BoardService);
 
   public createBanner = catchAsync(async (req: RequestWithFileAndUser, res: Response) => {
+    const isBoardAvailable = await this.board.isBoardAvailable(req.body.board, req.body.startDate, req.body.endDate);
+
+    if (!isBoardAvailable) {
+      throw new HttpException(httpStatus.BAD_REQUEST, 'This billboard is not available for the specified date range');
+    }
+
+    const bannerPrice = await this.banner.determineBannerPrice(_.pick(req.body, ['duration', 'board', 'startDate', 'endDate']));
+
     const bannerData: CreateBannerDto = {
       ...req.body,
       user: req.user.id,
-      status: BannerStatus.PENDING,
-      price: 10, // TODO: calculate price
+      status: BannerStatus.AWAITING_PAYMENT,
     };
+
+    bannerData['price'] = bannerPrice;
 
     const createBannerData = await this.banner.createBanner(bannerData);
 
@@ -60,7 +71,7 @@ export class BannerController {
     const { assetUrl, key } = req.body;
 
     if (!assetUrl || !key) {
-      throw new HttpException(httpStatus.BAD_REQUEST, 'Asset url or key are required');
+      throw new HttpException(httpStatus.BAD_REQUEST, 'Asset url or asset key are required');
     }
     const objectKey = assetUrl ? assetUrl.split('/').pop() : key;
 
