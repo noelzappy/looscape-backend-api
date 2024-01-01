@@ -35,6 +35,11 @@ const BoardSchema: Schema<IBoard & Document> = new Schema(
       enum: Object.values(BoardStatus),
       default: BoardStatus.ACTIVE,
     },
+    rate: {
+      type: Number,
+      required: true,
+      default: 10,
+    },
   },
   {
     timestamps: true,

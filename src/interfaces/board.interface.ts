@@ -29,4 +29,5 @@ export interface IBoard {
   doubleSided: boolean;
   location: IBoardLocation;
   status: BoardStatus;
+  rate: number;
 }

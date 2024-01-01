@@ -27,6 +27,10 @@ export class CreateBoardDto {
   @IsString()
   @IsNotEmpty()
   public location: ObjectId;
+
+  @IsNumber()
+  @IsNotEmpty()
+  public rate: number;
 }
 
 export class UpdateBoardDto {
@@ -57,6 +61,10 @@ export class UpdateBoardDto {
   @IsString()
   @IsOptional()
   public status: BoardStatus;
+
+  @IsNumber()
+  @IsNotEmpty()
+  public rate: number;
 }
 
 export class CreateBoardLocationDto {
