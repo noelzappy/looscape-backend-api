@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsInt, IsNumberString, IsDateString } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsInt, IsNumberString, IsDateString } from 'class-validator';
 import { GetQueryDto } from './misc.dto';
 
 export class CreateBannerDto {

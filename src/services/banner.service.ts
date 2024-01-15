@@ -5,6 +5,8 @@ import BannerModel from '@/models/banner.model';
 import { PaginatedData, QueryFilter } from '@/interfaces/misc.interface';
 import { BannerPriceParams, IBanner } from '@/interfaces/banner.interface';
 import { CreateBannerDto, UpdateBannerDto } from '@/dtos/banner.dto';
+import BoardModel from '@/models/board.model';
+import { getVideoDuration } from '@/utils/misc';
 
 @Service()
 export default class BannerService {
@@ -43,11 +45,36 @@ export default class BannerService {
     return banner;
   }
 
-  public async determineBannerPrice(banner: BannerPriceParams): Promise<number> {
-    const { duration, board, startDate, endDate } = banner;
+  public async calculateBlipCount(bannerParam: BannerPriceParams): Promise<number> {
+    const { assetType, assetUrl, blipCount } = bannerParam;
+    if (assetType === 'image') {
+      return blipCount || 1;
+    }
+
+    if (assetType === 'video') {
+      const videoDuration = await getVideoDuration(assetUrl);
+
+      return videoDuration;
+    }
+
+    return 0;
+  }
+
+  public async determineBannerPrice(bannerParam: BannerPriceParams): Promise<number> {
+    const { board, startDate, endDate } = bannerParam;
 
     // TODO: Implement logic to determine price based on duration, board, startDate and endDate
 
-    return 10;
+    const billBoard = await BoardModel.findById(board);
+
+    if (!billBoard) {
+      throw new HttpException(httpStatus.NOT_FOUND, 'The selected board does not exist');
+    }
+
+    const { rate } = billBoard;
+
+    const blipCount = await this.calculateBlipCount(bannerParam);
+
+    return rate * blipCount;
   }
 }

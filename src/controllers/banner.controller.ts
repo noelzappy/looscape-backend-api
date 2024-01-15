@@ -6,7 +6,7 @@ import catchAsync from '@/utils/catchAsync';
 import _ from 'lodash';
 import BannerService from '@/services/banner.service';
 import { CreateBannerDto, UpdateBannerDto } from '@/dtos/banner.dto';
-import { BannerStatus } from '@/interfaces/banner.interface';
+import { BannerPriceParams, BannerStatus } from '@/interfaces/banner.interface';
 import { HttpException } from '@/exceptions/HttpException';
 import { S3Client } from '@/config/s3config';
 import { DO_SPACES_BUCKET } from '@/config';
@@ -23,15 +23,30 @@ export class BannerController {
       throw new HttpException(httpStatus.BAD_REQUEST, 'This billboard is not available for the specified date range');
     }
 
-    const bannerPrice = await this.banner.determineBannerPrice(_.pick(req.body, ['duration', 'board', 'startDate', 'endDate']));
+    const reqBody: CreateBannerDto = req.body;
 
-    const bannerData: CreateBannerDto = {
-      ...req.body,
+    const bannerPriceParam: BannerPriceParams = {
+      assetType: reqBody.assetType,
+      assetUrl: reqBody.assetUrl,
+      board: reqBody.board,
+      startDate: reqBody.startDate,
+      endDate: reqBody.endDate,
+      blipCount: reqBody.duration,
+    };
+
+    const bannerPrice = await this.banner.determineBannerPrice(bannerPriceParam);
+
+    const bannerData: any = {
+      ...reqBody,
       user: req.user.id,
       status: BannerStatus.AWAITING_PAYMENT,
     };
 
     bannerData['price'] = bannerPrice;
+
+    console.log(bannerData);
+
+    return res.status(httpStatus.OK).send(bannerData);
 
     const createBannerData = await this.banner.createBanner(bannerData);
 

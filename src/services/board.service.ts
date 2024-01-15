@@ -6,6 +6,7 @@ import BoardModel from '@/models/board.model';
 import { CreateBoardDto, UpdateBoardDto } from '@/dtos/board.dto';
 import { PaginatedData, QueryFilter } from '@/interfaces/misc.interface';
 import BannerModel from '@/models/banner.model';
+import { BannerStatus } from '@/interfaces/banner.interface';
 
 @Service()
 export class BoardService {
@@ -63,17 +64,24 @@ export class BoardService {
    * the specified date range.
    */
   public async isBoardAvailable(boardId: string, startDate: Date, endDate: Date): Promise<boolean> {
-    const board = await BoardModel.findById(boardId);
-    if (!board) throw new HttpException(httpStatus.NOT_FOUND, "Board doesn't exist");
+    const board = await BoardModel.findOne({
+      _id: boardId,
+      status: {
+        $nin: [BoardStatus.DELETED, BoardStatus.INACTIVE, BoardStatus.MAINTENANCE],
+      },
+    });
 
-    // TODO: Implement logic to check if board is available for the specified date range
-    const isAvailable = true;
-    // const boardBanners = await BannerModel.find({ board: boardId, status: { $ne: 'ENDED' } });
+    if (!board) return false;
 
-    /*
-    check if board is available for the specified date range by checking if there are any banners that are active for the specified date range
-    */
+    const boardBanners = await BannerModel.find({
+      board: boardId,
+      status: {
+        $nin: [BannerStatus.ENDED, BannerStatus.INACTIVE, BannerStatus.AWAITING_PAYMENT, BannerStatus.AWAITING_APPROVAL, BannerStatus.PENDING],
+      },
+      startDate: { $lte: endDate },
+      endDate: { $gte: startDate },
+    });
 
-    return isAvailable;
+    return boardBanners.length === 0;
   }
 }

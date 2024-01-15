@@ -24,4 +24,11 @@ export interface IBanner {
   duration: number; // 15, 30, 45, 60
 }
 
-export type BannerPriceParams = Pick<IBanner, 'duration' | 'board' | 'startDate' | 'endDate'>;
+export type BannerPriceParams = {
+  assetType: 'image' | 'video';
+  assetUrl: string;
+  board: string | IBoard;
+  startDate: Date;
+  endDate: Date;
+  blipCount?: number;
+};
